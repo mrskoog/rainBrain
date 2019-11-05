@@ -12,3 +12,8 @@ if the rain sensor has registered rain every 30min.
 ## Plotter
 - KNN reference from sickit
 - Dump CSV data to .h file
+-  LogisticRegression for refrence
+-  Random Forest classifier for reference
+
+## Weather_data.csv
+Rain and air pressure data recorded and labled

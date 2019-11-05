@@ -4,6 +4,7 @@
 #define LED_PIN 0
 #define K_NEIGHBORS 9
 #define MILLISECONDS_30MIN 1800000
+#define ALTITUDE_OF_SENSOR 103
 
 Adafruit_BMP085 bmp;
 
@@ -104,7 +105,7 @@ void loop() {
 
 
   for (size_t i = 0; i < 5; i++) {
-    pressure += bmp.readPressure();
+    pressure += (float)bmp.readSealevelPressure(ALTITUDE_OF_SENSOR);
   }
   pressure = pressure / 5;
 
@@ -124,5 +125,4 @@ void loop() {
     Serial.println(rain);
   }
   delay(MILLISECONDS_30MIN);
-  delay(1000);
 }
