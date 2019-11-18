@@ -1,7 +1,8 @@
 #include <Adafruit_BMP085.h>
 #include <math.h>
 #include "dataset.h"
-#define LED_PIN 0
+#define LED_PIN_WHITE 7
+#define LED_PIN_BLUE 6
 #define K_NEIGHBORS 9
 #define MILLISECONDS_30MIN 1800000
 #define ALTITUDE_OF_SENSOR 103
@@ -78,8 +79,10 @@ byte run_knn(float pressure, float delta)
 }
 
 void setup() {
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, HIGH);
+  pinMode(LED_PIN_BLUE, OUTPUT);
+  digitalWrite(LED_PIN_BLUE, LOW);
+    pinMode(LED_PIN_WHITE, OUTPUT);
+  digitalWrite(LED_PIN_WHITE, LOW);
   Serial.begin(9600);
   delay(1000);
 
@@ -95,15 +98,6 @@ void loop() {
   float delta = 0;
   static float previous_pressure = 0;
 
-  // Serial.println("next pressure value:");
-  // // read new pressure
-  // while (Serial.available() == 0) {
-  //   /* pass */
-  // }
-  //
-  // pressure = Serial.parseFloat();
-
-
   for (size_t i = 0; i < 5; i++) {
     pressure += (float)bmp.readSealevelPressure(ALTITUDE_OF_SENSOR);
   }
@@ -117,9 +111,11 @@ void loop() {
     previous_pressure = pressure;
     byte rain = run_knn(pressure, delta);
     if(rain) {
-      digitalWrite(LED_PIN, HIGH);
+      digitalWrite(LED_PIN_BLUE, LOW);
+      digitalWrite(LED_PIN_WHITE, HIGH);
     } else {
-      digitalWrite(LED_PIN, LOW);
+      digitalWrite(LED_PIN_BLUE, HIGH);
+      digitalWrite(LED_PIN_WHITE, LOW);
     }
     Serial.print("output: ");
     Serial.println(rain);
