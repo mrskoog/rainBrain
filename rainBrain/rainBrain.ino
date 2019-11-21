@@ -1,13 +1,15 @@
 #include <Adafruit_BMP085.h>
 #include <math.h>
+#include <EEPROM.h>
 #include "dataset.h"
 #define LED_PIN_WHITE 7
 #define LED_PIN_BLUE 6
 #define K_NEIGHBORS 9
 #define MILLISECONDS_30MIN 1800000
-#define ALTITUDE_OF_SENSOR 103
+
 
 Adafruit_BMP085 bmp;
+short altitude = 0;
 
 float euclidean_distance_2d(float x0, float x1, float y0, float y1)
 {
@@ -81,11 +83,29 @@ byte run_knn(float pressure, float delta)
 void setup() {
   pinMode(LED_PIN_BLUE, OUTPUT);
   digitalWrite(LED_PIN_BLUE, LOW);
-    pinMode(LED_PIN_WHITE, OUTPUT);
+  pinMode(LED_PIN_WHITE, OUTPUT);
   digitalWrite(LED_PIN_WHITE, LOW);
+  EEPROM.get(0, altitude);   
   Serial.begin(9600);
   delay(1000);
 
+  Serial.print("Current altitude set to:");
+  Serial.println(altitude);
+  Serial.print("Set new altitude: ");
+
+  int timeout = 1000;
+  while (Serial.available() == 0) {
+     delay(10);
+     if(--timeout == 0) {
+      break;
+     }
+  }
+  if(timeout > 0) {
+    altitude = Serial.parseFloat();
+    EEPROM.put(0, altitude); 
+    Serial.println("\nNew altitude saved");
+  }
+  
   if (!bmp.begin()) {
     Serial.println("Could not find a valid BMP185 sensor, check wiring!");
     while (1) {}
@@ -99,12 +119,12 @@ void loop() {
   static float previous_pressure = 0;
 
   for (size_t i = 0; i < 5; i++) {
-    pressure += (float)bmp.readSealevelPressure(ALTITUDE_OF_SENSOR);
+    pressure += (float)bmp.readSealevelPressure(altitude);
   }
   pressure = pressure / 5;
 
   if (pressure != 0) {
-    Serial.print("input: ");
+    Serial.print("Current preassure: ");
     Serial.println(pressure);
 
     delta = calc_presure_delta(pressure, previous_pressure);

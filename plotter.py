@@ -8,9 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 
-def moving_average(data_set, periods=3):
-    weights = np.ones(periods) / periods
-    return np.convolve(data_set, weights, mode='valid')
+ALTITUDE_OF_SENSOR = 103
 
 def dump_c_data(pressure, delta, rain):
     with open("dataset.h", "w") as f:
@@ -27,15 +25,13 @@ def dump_c_data(pressure, delta, rain):
             f.write(str(rain[i])+",\n")
         f.write(str(rain[i])+"};\n")
 
-def p(c,x):
-    return c[0]*x**2 + c[1]*x
-
 data = pd.read_csv('weather_data.csv', names = ['rain','temp','pressure','date'])
 
-plt.plot(range(len(data.pressure)), data.pressure, range(len(data.rain)), (data.rain*1000) + 98000)
-
 time_shifted_p = np.array(data.pressure[0:-2])
+time_shifted_p = time_shifted_p / pow(1.0 - ALTITUDE_OF_SENSOR/44330.0, 5.255) #make pressure sealevel
 time_shifted_r = np.array(data.rain[2:])
+
+plt.plot(range(len(time_shifted_p)), time_shifted_p, range(len(time_shifted_r)), (time_shifted_r*1000) + 98000)
 
 delta = np.diff(time_shifted_p) / 2
 delta = np.insert(delta,0,0)
@@ -43,6 +39,8 @@ delta = np.insert(delta,0,0)
 data2 = {'pressure' :  time_shifted_p, 'delta' : delta }
 
 X = pd.DataFrame(data2)
+
+print(X)
 
 fig = plt.figure("scatter")
 sc = plt.scatter(X.pressure, X.delta ,c = time_shifted_r)
@@ -54,13 +52,8 @@ dump_c_data(time_shifted_p,delta,time_shifted_r)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
-# sc = StandardScaler()
-# X_train = sc.fit_transform(X_train)
-# X_test = sc.transform(X_test)
-
 print(y_train.shape)
 print(y_test.shape)
-
 
 neighbors = np.arange(1, 25)
 train_accuracy = np.empty(len(neighbors))
