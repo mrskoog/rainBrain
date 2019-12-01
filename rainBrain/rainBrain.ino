@@ -2,10 +2,11 @@
 #include <math.h>
 #include <EEPROM.h>
 #include "dataset.h"
-#define LED_PIN_WHITE 7
+#define LED_PIN_WHITE 4
 #define LED_PIN_BLUE 6
 #define K_NEIGHBORS 9
 #define MILLISECONDS_30MIN 1800000
+#define WHITE_PWN 90
 
 
 Adafruit_BMP085 bmp;
@@ -84,7 +85,7 @@ void setup() {
   pinMode(LED_PIN_BLUE, OUTPUT);
   digitalWrite(LED_PIN_BLUE, LOW);
   pinMode(LED_PIN_WHITE, OUTPUT);
-  digitalWrite(LED_PIN_WHITE, LOW);
+  analogWrite(LED_PIN_WHITE, 255 - WHITE_PWN);
   EEPROM.get(0, altitude);   
   Serial.begin(9600);
   delay(1000);
@@ -135,7 +136,7 @@ void loop() {
       digitalWrite(LED_PIN_WHITE, HIGH);
     } else {
       digitalWrite(LED_PIN_BLUE, HIGH);
-      digitalWrite(LED_PIN_WHITE, LOW);
+      analogWrite(LED_PIN_WHITE, 255 - WHITE_PWN);
     }
     Serial.print("output: ");
     Serial.println(rain);
